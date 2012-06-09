@@ -1,0 +1,61 @@
+<?php
+	global $COURSE;
+	
+    $usehtmleditor = can_use_html_editor();
+    
+    $groups = groups_get_all_groups($COURSE->id);
+
+	$texts = array();
+    if (empty($this->instance->pinned) and $this->instance->pagetype !== 'course-view') {
+    	if (!empty($this->config->textids)){
+	    	foreach(array_keys($this->config->textids) as $gid){
+	    		$textkey = "text_$gid";
+		        $this->config->$textkey = clean_text(@$this->config->$textkey, FORMAT_HTML);
+		    }
+		}
+    }
+?>
+<table cellpadding="9" cellspacing="0">
+<tr valign="top">
+    <td align="right"><?php print_string('configtitle', 'block_groupspecifichtml'); ?>:</td>
+    <td><input type="text" name="title" size="30" value="<?php echo isset($this->config->title)?p($this->config->title):''; ?>" /> (<?php print_string('leaveblanktohide', 'block_groupspecifichtml'); ?>)</td>
+</tr>
+<tr valign="top">
+    <td align="right"><?php print_string('configcontentforall', 'block_groupspecifichtml'); ?>:</td>
+    <td><?php 
+    	$textkey = "text_all";
+    	print_textarea($usehtmleditor, 25, 50, 0, 0, $textkey, @$this->config->$textkey) ?>
+    	</td>
+</tr>
+<tr valign="top">
+    <td align="right"><?php print_string('configcontentforany', 'block_groupspecifichtml'); ?>:</td>
+    <td><?php 
+    	$textkey = "text_0";
+    	print_textarea($usehtmleditor, 25, 50, 0, 0, $textkey, @$this->config->$textkey) ?>
+    	</td>
+</tr>
+<?php
+if (!empty($groups)){
+	foreach($groups as $g){
+?>
+<tr valign="top">
+    <td align="right"><?php print_string('configcontent', 'block_groupspecifichtml', $g->name); ?>:</td>
+    <td><?php 
+    	$textkey = "text_{$g->id}";
+    	print_textarea($usehtmleditor, 25, 50, 0, 0, $textkey, @$this->config->$textkey) ?>
+    	<input type="hidden" name="textids[]" value="<?php echo $g->id ?>" />
+    	</td>
+</tr>
+<?php
+	}
+}
+?>
+<tr>
+    <td colspan="3" align="center">
+    <input type="submit" value="<?php print_string('savechanges') ?>" /></td>
+</tr>
+</table>
+<?php if ($usehtmleditor) {
+          use_html_editor(); 
+      }
+?>
