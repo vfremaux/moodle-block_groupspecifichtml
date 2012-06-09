@@ -1,3 +1,6 @@
+moodle-mod_customlabel
+=======================
+
 Author : Valery Fremaux
 
 This very simple block allows a more flexible possibility in 
