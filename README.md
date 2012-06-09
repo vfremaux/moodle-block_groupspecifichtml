@@ -1,5 +1,5 @@
-moodle-mod_customlabel
-=======================
+moodle-block_groupspecifichtml
+==============================
 
 Author : Valery Fremaux
 
