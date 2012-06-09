@@ -12,8 +12,12 @@ in the course.
 The bloc has a "match all" case being printed first, and allows
 also giving an extra information to people being "out of groups"
 
+Versions
+========
+Actually only MOODLE_19_STABLE
+
 Installation
-#######################
+============
 
 Trivial bloc install. Take the package and drop it within your
 <moodleroot>/blocks directory, then 
