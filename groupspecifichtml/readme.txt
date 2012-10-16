@@ -9,7 +9,7 @@ also giving an extra information to people being "out of groups"
 
 Version
 #######################
-Moodle 2.x
+Moodle 1.9.X
 
 Installation
 #######################
