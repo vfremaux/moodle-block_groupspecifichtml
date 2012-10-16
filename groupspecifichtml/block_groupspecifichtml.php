@@ -1,10 +1,9 @@
-<?php //$Id: block_groupspecifichtml.php,v 1.1 2012-03-22 13:43:39 vf Exp $
+<?php //$Id: block_groupspecifichtml.php,v 1.2 2012-07-10 16:42:00 vf Exp $
 
 class block_groupspecifichtml extends block_base {
 
     function init() {
-        $this->title = get_string('blockname', 'block_groupspecifichtml');
-        $this->version = 2012032000;
+        $this->title = get_string('pluginname', 'block_groupspecifichtml');
     }
 
     function applicable_formats() {
@@ -25,40 +24,65 @@ class block_groupspecifichtml extends block_base {
         if ($this->content !== NULL) {
             return $this->content;
         }
-                
-        if (!empty($this->instance->pinned) or $this->instance->pagetype === 'course-view') {
-            // fancy html allowed only on course page and in pinned blocks for security reasons
-            $filteropt = new stdClass;
+
+        $filteropt = new stdClass;
+        $filteropt->overflowdiv = true;
+        if ($this->content_is_trusted()) {
+            // fancy html allowed only on course, category and system blocks.
             $filteropt->noclean = true;
-        } else {
-            $filteropt = null;
         }
-        
+                        
         $this->content = new stdClass;
 
         $this->content->text = '';
 
 		$usegroupmenu = true;
-		if (!has_capability('moodle/course:manageactivities', get_context_instance(CONTEXT_COURSE, $COURSE->id))){
+		if (has_capability('moodle/site:accessallgroups', context_course::instance($COURSE->id))){
+			$usegroupmenu = true;
+		} else {
 	        $usergroupings = groups_get_user_groups($COURSE->id, $USER->id);
 	        if (count($usergroupings) == 1){
-	        	$usergroups = next($usergroupings);
+	        	$usergroups = array_pop($usergroupings);
 	        	if (count($usergroups) == 1){
 	        		$usegroupmenu = false;
+	        		$uniquegroup = array_pop($usergroups);
 	        	}
 	        }
 	    }
 
-        if ($groups = groups_get_all_groups($COURSE->id) && $usegroupmenu){
+		$coursegroups = groups_get_all_groups($COURSE->id);
+        if (($coursegroups) && $usegroupmenu){
         	$this->content->text .= groups_print_course_menu($COURSE, $CFG->wwwroot.'/course/view.php?id='.$COURSE->id, true);
         }
 
-        $gid = 0 + groups_get_course_group($COURSE);
+        $gid = 0 + groups_get_course_group($COURSE, $USER->id);
+        if (@$uniquegroup && !$gid){
+        	$gid = $uniquegroup;
+        }
+        
+        $textkeys = array('text_all');
+		if (!empty($coursegroups)){
+			$textkeys[] = 'text_'.$gid;
+		}
 
-        $textkey = "text_all";
-        $this->content->text .= !empty($this->config->$textkey) ? format_text($this->config->$textkey, FORMAT_HTML, $filteropt) : '';
-        $textkey = "text_$gid";
-        $this->content->text .= isset($this->config->$textkey) ? format_text($this->config->$textkey, FORMAT_HTML, $filteropt) : '';
+		foreach($textkeys as $tk){        
+	        if (isset($this->config->$tk)) {
+		        $format = FORMAT_HTML;
+		        // Check to see if the format has been properly set on the config
+		        $formatkey = str_replace('text_', 'format_', $tk);
+		        if (isset($this->config->$formatkey)) {
+		            $format = $this->config->$formatkey;
+		        }
+	            // rewrite url
+	            $this->config->$tk = file_rewrite_pluginfile_urls($this->config->$tk, 'pluginfile.php', $this->context->id, 'block_groupspecifichtml', 'content', NULL);
+	            // Default to FORMAT_HTML which is what will have been used before the
+	            // editor was properly implemented for the block.
+		        $this->content->text .= format_text($this->config->$tk, $format, $filteropt);
+	        } else {
+	            $this->content->text .= '';
+	        }
+	    }
+
         $this->content->footer = '';
 
         unset($filteropt); // memory footprint
@@ -69,60 +93,68 @@ class block_groupspecifichtml extends block_base {
     }
 
     /**
-     * Will be called before an instance of this block is backed up, so that any links in
-     * any links in any HTML fields on config can be encoded.
-     * @return string
+     * Serialize and store config data
      */
-    function get_backup_encoded_config() {
-        /// Prevent clone for non configured block instance. Delegate to parent as fallback.
-        if (empty($this->config)) {
-            return parent::get_backup_encoded_config();
-        }
-        $data = clone($this->config);
-        foreach(array_keys($data->textids) as $gid){
-        	$textkey = "text_$gid";
-	        $data->$textkey = backup_encode_absolute_links($data->text[$gid]);
-	    }
-        return base64_encode(serialize($data));
+    function instance_config_save($data, $nolongerused = false) {
+        global $DB, $COURSE;
+
+        $config = clone($data);
+        // Move embedded files into a proper filearea and adjust HTML links to match
+        $config->text_all = file_save_draft_area_files($data->text_all['itemid'], $this->context->id, 'block_groupspecificthtml', 'content', 0, array('subdirs' => true), $data->text_all['text']);
+        $config->format_all = $data->text_all['format'];
+
+        $config->text_0 = file_save_draft_area_files($data->text_all['itemid'], $this->context->id, 'block_groupspecificthtml', 'content', 0, array('subdirs' => true), $data->text_0['text']);
+        $config->format_0 = $data->text_0['format'];
+
+		$groups = groups_get_all_groups($COURSE->id);
+		if (!empty($groups)){
+			foreach($groups as $g){
+				$textkey = 'text_'.$g->id;
+				$formatkey = 'format_'.$g->id;
+	        	$config->{$textkey} = file_save_draft_area_files($data->{$textkey}['itemid'], $this->context->id, 'block_groupspecificthtml', 'content', 0, array('subdirs' => true), $data->{$textkey}['text']);
+	        	$config->{$formatkey} = $data->{$textkey}['format'];
+	        }
+		}
+		
+        parent::instance_config_save($config, $nolongerused);
     }
 
-    /**
-     * This function makes all the necessary calls to {@link restore_decode_content_links_worker()}
-     * function in order to decode contents of this block from the backup 
-     * format to destination site/course in order to mantain inter-activities 
-     * working in the backup/restore process. 
-     * 
-     * This is called from {@link restore_decode_content_links()} function in the restore process.
-     *
-     * NOTE: There is no block instance when this method is called.
-     *
-     * @param object $restore Standard restore object
-     * @return boolean
-     **/
-    function decode_content_links_caller($restore) {
-        global $CFG;
+    function instance_delete() {
+        global $DB;
+        $fs = get_file_storage();
+        $fs->delete_area_files($this->context->id, 'block_groupspecifichtml');
+        return true;
+    }
 
-        if ($restored_blocks = get_records_select("backup_ids","table_name = 'block_instance' AND backup_code = $restore->backup_unique_code AND new_id > 0", "", "new_id")) {
-            $restored_blocks = implode(',', array_keys($restored_blocks));
-            $sql = "SELECT bi.*
-                      FROM {$CFG->prefix}block_instance bi
-                           JOIN {$CFG->prefix}block b ON b.id = bi.blockid
-                     WHERE b.name = 'groupspecifichtml' AND bi.id IN ($restored_blocks)"; 
+    function content_is_trusted() {
+        global $SCRIPT;
 
-            if ($instances = get_records_sql($sql)) {
-                foreach ($instances as $instance) {
-                    $blockobject = block_instance('groupspecifichtml', $instance);
-                    foreach(array_keys($blockobject->config->textids) as $gid){
-                    	$textkey = "text_$gid";
-	                    $blockobject->config->$textkey = restore_decode_absolute_links($blockobject->config->$textkey);
-	                    $blockobject->config->$textkey = restore_decode_content_links_worker($blockobject->config->$textkey, $restore);
-	                }
-                    $blockobject->instance_config_commit($blockobject->pinned);
-                }
+        if (!$context = get_context_instance_by_id($this->instance->parentcontextid)) {
+            return false;
+        }
+        //find out if this block is on the profile page
+        if ($context->contextlevel == CONTEXT_USER) {
+            if ($SCRIPT === '/my/index.php') {
+                // this is exception - page is completely private, nobody else may see content there
+                // that is why we allow JS here
+                return true;
+            } else {
+                // no JS on public personal pages, it would be a big security issue
+                return false;
             }
         }
 
         return true;
+    }
+
+    /**
+     * The block should only be dockable when the title of the block is not empty
+     * and when parent allows docking.
+     *
+     * @return bool
+     */
+    public function instance_can_be_docked() {
+        return (!empty($this->config->title) && parent::instance_can_be_docked());
     }
 
     /*
@@ -132,11 +164,12 @@ class block_groupspecifichtml extends block_base {
         return empty($this->config->title);
     }
 
+	/*
 	function get_group_content($gid, $grouponly = false){
 
 		$text = '';
 
-        if (!empty($this->instance->pinned) or $this->instance->pagetype === 'course-view') {
+        if ($this->instance->pagetype === 'course-view') {
             // fancy html allowed only on course page and in pinned blocks for security reasons
             $filteropt = new stdClass;
             $filteropt->noclean = true;
@@ -153,6 +186,6 @@ class block_groupspecifichtml extends block_base {
         
         return $text;
 	}
-
+	*/
 }
 ?>
