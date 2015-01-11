@@ -7,7 +7,7 @@ class block_groupspecifichtml extends block_base {
     }
 
     function applicable_formats() {
-        return array('all' => true, 'admin' => false);
+        return array('all' => false, 'course' => true);
     }
 
     function specialization() {
@@ -188,4 +188,3 @@ class block_groupspecifichtml extends block_base {
 	}
 	*/
 }
-?>
