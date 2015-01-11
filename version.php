@@ -29,4 +29,4 @@ $plugin->version   = 2014082600;        // The current plugin version (Date: YYY
 $plugin->requires  = 2013111800;        // Requires this Moodle version
 $plugin->component = 'block_groupspecifichtml';  // Full name of the plugin (used for diagnostics)
 $plugin->maturity = MATURITY_RC;
-$plugin->release = '2.5.0 (build 2014082600)';
+$plugin->release = '2.6.0 (build 2014082600)';
