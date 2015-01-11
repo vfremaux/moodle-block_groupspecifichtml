@@ -1,26 +1,40 @@
-<?php //$Id: block_groupspecifichtml.php,v 1.2 2012-07-10 16:42:00 vf Exp $
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 class block_groupspecifichtml extends block_base {
 
-    function init() {
+    public function init() {
         $this->title = get_string('pluginname', 'block_groupspecifichtml');
     }
 
-    function applicable_formats() {
-        return array('all' => false, 'course' => true);
+    public function applicable_formats() {
+        return array('all' => false, 'course' => true, 'admin' => false, 'my' => false);
     }
 
-    function specialization() {
+    public function specialization() {
         $this->title = isset($this->config->title) ? format_string($this->config->title) : format_string(get_string('newhtmlblock', 'block_groupspecifichtml'));
     }
 
-    function instance_allow_multiple() {
+    public function instance_allow_multiple() {
         return true;
     }
 
-    function get_content() {
-    	global $COURSE, $CFG, $USER;
-    	
+    public function get_content() {
+        global $COURSE, $CFG, $USER;
+        
         if ($this->content !== NULL) {
             return $this->content;
         }
@@ -31,63 +45,67 @@ class block_groupspecifichtml extends block_base {
             // fancy html allowed only on course, category and system blocks.
             $filteropt->noclean = true;
         }
-                        
+
         $this->content = new stdClass;
 
         $this->content->text = '';
 
-		$usegroupmenu = true;
-		if (has_capability('moodle/site:accessallgroups', context_course::instance($COURSE->id))){
-			$usegroupmenu = true;
-		} else {
-	        $usergroupings = groups_get_user_groups($COURSE->id, $USER->id);
-	        if (count($usergroupings) == 1){
-	        	$usergroups = array_pop($usergroupings);
-	        	if (count($usergroups) == 1){
-	        		$usegroupmenu = false;
-	        		$uniquegroup = array_pop($usergroups);
-	        	}
-	        }
-	    }
+        $usegroupmenu = true;
+        if (has_capability('moodle/site:accessallgroups', context_course::instance($COURSE->id))) {
+            $usegroupmenu = true;
+        } else {
+            $usergroupings = groups_get_user_groups($COURSE->id, $USER->id);
+            if (count($usergroupings) == 1) {
+                $usergroups = array_pop($usergroupings);
+                if (count($usergroups) == 1) {
+                    $usegroupmenu = false;
+                    $uniquegroup = array_pop($usergroups);
+                }
+            }
+        }
 
-		$coursegroups = groups_get_all_groups($COURSE->id);
-        if (($coursegroups) && $usegroupmenu){
-        	$this->content->text .= groups_print_course_menu($COURSE, $CFG->wwwroot.'/course/view.php?id='.$COURSE->id, true);
+        $coursegroups = groups_get_all_groups($COURSE->id);
+        if (($coursegroups) && $usegroupmenu) {
+            $this->content->text .= groups_print_course_menu($COURSE, $CFG->wwwroot.'/course/view.php?id='.$COURSE->id, true);
         }
 
         $gid = 0 + groups_get_course_group($COURSE, $USER->id);
-        if (@$uniquegroup && !$gid){
-        	$gid = $uniquegroup;
+        if (@$uniquegroup && !$gid) {
+            $gid = $uniquegroup;
         }
-        
-        $textkeys = array('text_all');
-		if (!empty($coursegroups)){
-			$textkeys[] = 'text_'.$gid;
-		}
 
-		foreach($textkeys as $tk){        
-	        if (isset($this->config->$tk)) {
-		        $format = FORMAT_HTML;
-		        // Check to see if the format has been properly set on the config
-		        $formatkey = str_replace('text_', 'format_', $tk);
-		        if (isset($this->config->$formatkey)) {
-		            $format = $this->config->$formatkey;
-		        }
-	            // rewrite url
-	            $this->config->$tk = file_rewrite_pluginfile_urls($this->config->$tk, 'pluginfile.php', $this->context->id, 'block_groupspecifichtml', 'content', NULL);
-	            // Default to FORMAT_HTML which is what will have been used before the
-	            // editor was properly implemented for the block.
-		        $this->content->text .= format_text($this->config->$tk, $format, $filteropt);
-	        } else {
-	            $this->content->text .= '';
-	        }
-	    }
+        $textkeys = array('text_all');
+        if (!empty($coursegroups)) {
+            $textkeys[] = 'text_'.$gid;
+        }
+
+        foreach ($textkeys as $tk) {
+            if (isset($this->config->$tk)) {
+                $format = FORMAT_HTML;
+                // Check to see if the format has been properly set on the config.
+                $formatkey = str_replace('text_', 'format_', $tk);
+                if (isset($this->config->$formatkey)) {
+                    $format = $this->config->$formatkey;
+                }
+                // Rewrite url.
+                $this->config->$tk = file_rewrite_pluginfile_urls($this->config->$tk, 'pluginfile.php', $this->context->id, 'block_groupspecifichtml', 'content', NULL);
+                /*
+                 * Default to FORMAT_HTML which is what will have been used before the
+                 * editor was properly implemented for the block.
+                 */
+                $this->content->text .= format_text($this->config->$tk, $format, $filteropt);
+            } else {
+                $this->content->text .= '';
+            }
+        }
 
         $this->content->footer = '';
 
-        unset($filteropt); // memory footprint
-        
-        if (empty($this->content->text)) $this->content->text = '&nbsp;';
+        unset($filteropt); // Memory footprint.
+
+        if (empty($this->content->text)) {
+            $this->content->text = '&nbsp;';
+        }
 
         return $this->content;
     }
@@ -106,21 +124,22 @@ class block_groupspecifichtml extends block_base {
         $config->text_0 = file_save_draft_area_files($data->text_all['itemid'], $this->context->id, 'block_groupspecificthtml', 'content', 0, array('subdirs' => true), $data->text_0['text']);
         $config->format_0 = $data->text_0['format'];
 
-		$groups = groups_get_all_groups($COURSE->id);
-		if (!empty($groups)){
-			foreach($groups as $g){
-				$textkey = 'text_'.$g->id;
-				$formatkey = 'format_'.$g->id;
-	        	$config->{$textkey} = file_save_draft_area_files($data->{$textkey}['itemid'], $this->context->id, 'block_groupspecificthtml', 'content', 0, array('subdirs' => true), $data->{$textkey}['text']);
-	        	$config->{$formatkey} = $data->{$textkey}['format'];
-	        }
-		}
-		
+        $groups = groups_get_all_groups($COURSE->id);
+        if (!empty($groups)) {
+            foreach ($groups as $g) {
+                $textkey = 'text_'.$g->id;
+                $formatkey = 'format_'.$g->id;
+                $config->{$textkey} = file_save_draft_area_files($data->{$textkey}['itemid'], $this->context->id, 'block_groupspecificthtml', 'content', 0, array('subdirs' => true), $data->{$textkey}['text']);
+                $config->{$formatkey} = $data->{$textkey}['format'];
+            }
+        }
+
         parent::instance_config_save($config, $nolongerused);
     }
 
     function instance_delete() {
         global $DB;
+
         $fs = get_file_storage();
         $fs->delete_area_files($this->context->id, 'block_groupspecifichtml');
         return true;
@@ -132,14 +151,14 @@ class block_groupspecifichtml extends block_base {
         if (!$context = get_context_instance_by_id($this->instance->parentcontextid)) {
             return false;
         }
-        //find out if this block is on the profile page
+
+        // Find out if this block is on the profile page.
         if ($context->contextlevel == CONTEXT_USER) {
             if ($SCRIPT === '/my/index.php') {
-                // this is exception - page is completely private, nobody else may see content there
-                // that is why we allow JS here
+                // This is exception - page is completely private, nobody else may see content there that is why we allow JS here.
                 return true;
             } else {
-                // no JS on public personal pages, it would be a big security issue
+                // No JS on public personal pages, it would be a big security issue.
                 return false;
             }
         }
@@ -160,31 +179,7 @@ class block_groupspecifichtml extends block_base {
     /*
      * Hide the title bar when none set..
      */
-    function hide_header(){
+    function hide_header() {
         return empty($this->config->title);
     }
-
-	/*
-	function get_group_content($gid, $grouponly = false){
-
-		$text = '';
-
-        if ($this->instance->pagetype === 'course-view') {
-            // fancy html allowed only on course page and in pinned blocks for security reasons
-            $filteropt = new stdClass;
-            $filteropt->noclean = true;
-        } else {
-            $filteropt = null;
-        }
-
-		if (!$grouponly){
-	        $textkey = "text_all";
-	        $text .= !empty($this->config->$textkey) ? format_text($this->config->$textkey, FORMAT_HTML, $filteropt) : '';
-	    }
-        $textkey = "text_$gid";
-        $text .= isset($this->config->$textkey) ? format_text($this->config->$textkey, FORMAT_HTML, $filteropt) : '';
-        
-        return $text;
-	}
-	*/
 }
