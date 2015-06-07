@@ -148,7 +148,7 @@ class block_groupspecifichtml extends block_base {
     function content_is_trusted() {
         global $SCRIPT;
 
-        if (!$context = get_context_instance_by_id($this->instance->parentcontextid)) {
+        if (!$context = context::instance_by_id($this->instance->parentcontextid)) {
             return false;
         }
 
