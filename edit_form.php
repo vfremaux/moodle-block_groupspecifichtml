@@ -31,7 +31,7 @@ class block_groupspecifichtml_edit_form extends block_edit_form {
         // Fields for editing HTML block title and contents.
         $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
 
-        $mform->addElement('text', 'config_title', get_string('configtitle', 'block_editablecontenthtml'));
+        $mform->addElement('text', 'config_title', get_string('configtitle', 'block_groupspecifichtml'));
         $mform->setType('config_title', PARAM_MULTILANG);
 
         $editoroptions = array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $this->block->context);
