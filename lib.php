@@ -14,10 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * Form for editing HTML block instances.
  *
  * @package   block_groupspecifichtml
+ * @category  blocks
  * @copyright 2012 Valery Fremaux (valery.fremaux@gmail.com)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @version   Moodle 2.x
@@ -38,10 +41,11 @@ function block_groupspecifichtml_pluginfile($course, $birecord_or_cm, $context, 
 
     $fs = get_file_storage();
 
+    $itemid = array_shift($args);
     $filename = array_pop($args);
     $filepath = $args ? '/'.implode('/', $args).'/' : '/';
 
-    if (!$file = $fs->get_file($context->id, 'block_groupspecifichtml', 'content', 0, $filepath, $filename) or $file->is_directory()) {
+    if (!$file = $fs->get_file($context->id, 'block_groupspecifichtml', 'content', $itemid, $filepath, $filename) or $file->is_directory()) {
         send_file_not_found();
     }
 

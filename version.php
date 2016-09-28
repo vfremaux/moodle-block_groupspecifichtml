@@ -17,8 +17,8 @@
 /**
  * Version details
  *
- * @package    block
- * @subpackage groupspecifichtml
+ * @package    block_groupspecifichtml
+ * @category   blocks
  * @copyright  2012 valery fremaux (valery.fremaux@gmail.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,3 +30,6 @@ $plugin->requires  = 2014042900;        // Requires this Moodle version
 $plugin->component = 'block_groupspecifichtml';  // Full name of the plugin (used for diagnostics)
 $plugin->maturity = MATURITY_RC;
 $plugin->release = '2.7.0 (build 2014082600)';
+
+// Non moodle attributes.
+$plugin->codeincrement = '2.7.0000';
