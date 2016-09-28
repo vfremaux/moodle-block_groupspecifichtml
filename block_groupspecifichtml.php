@@ -14,6 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * @package   block_group_network
+ * @category  blocks
+ * @author    Valery Fremaux (valery.fremaux@gmail.com)
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL
+ */
+
 class block_groupspecifichtml extends block_base {
 
     public function init() {
