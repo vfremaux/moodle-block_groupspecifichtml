@@ -14,13 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * @package   block_group_network
  * @category  blocks
  * @author    Valery Fremaux (valery.fremaux@gmail.com)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL
  */
-defined('MOODLE_INTERNAL') || die();
 
 class block_groupspecifichtml extends block_base {
 
@@ -42,7 +43,7 @@ class block_groupspecifichtml extends block_base {
 
     public function get_content() {
         global $COURSE, $CFG, $USER;
-
+        
         if ($this->content !== NULL) {
             return $this->content;
         }
@@ -50,7 +51,7 @@ class block_groupspecifichtml extends block_base {
         $filteropt = new stdClass;
         $filteropt->overflowdiv = true;
         if ($this->content_is_trusted()) {
-            // Fancy html allowed only on course, category and system blocks.
+            // fancy html allowed only on course, category and system blocks.
             $filteropt->noclean = true;
         }
 
@@ -74,7 +75,7 @@ class block_groupspecifichtml extends block_base {
 
         $coursegroups = groups_get_all_groups($COURSE->id);
         if (($coursegroups) && $usegroupmenu) {
-            $this->content->text .= groups_print_course_menu($COURSE, new moodle_url('/course/view.php', array('id' => $COURSE->id)), true);
+            $this->content->text .= groups_print_course_menu($COURSE, $CFG->wwwroot.'/course/view.php?id='.$COURSE->id, true);
         }
 
         $gid = 0 + groups_get_course_group($COURSE, $USER->id);
@@ -82,12 +83,12 @@ class block_groupspecifichtml extends block_base {
             $gid = $uniquegroup;
         }
 
-        $textkeys = array('text_all' => 99999999);
+        $textkeys = array('text_all');
         if (!empty($coursegroups)) {
-            $textkeys['text_'.$gid] = $gid;
+            $textkeys[] = 'text_'.$gid;
         }
 
-        foreach ($textkeys as $tk => $tkgid) {
+        foreach ($textkeys as $tk) {
             if (isset($this->config->$tk)) {
                 $format = FORMAT_HTML;
                 // Check to see if the format has been properly set on the config.
@@ -96,7 +97,7 @@ class block_groupspecifichtml extends block_base {
                     $format = $this->config->$formatkey;
                 }
                 // Rewrite url.
-                $this->config->$tk = file_rewrite_pluginfile_urls($this->config->$tk, 'pluginfile.php', $this->context->id, 'block_groupspecifichtml', 'content', $tkgid, null);
+                $this->config->$tk = file_rewrite_pluginfile_urls($this->config->$tk, 'pluginfile.php', $this->context->id, 'block_groupspecifichtml', 'content', NULL);
                 /*
                  * Default to FORMAT_HTML which is what will have been used before the
                  * editor was properly implemented for the block.
@@ -121,17 +122,15 @@ class block_groupspecifichtml extends block_base {
     /**
      * Serialize and store config data
      */
-    public function instance_config_save($data, $nolongerused = false) {
+    function instance_config_save($data, $nolongerused = false) {
         global $DB, $COURSE;
 
         $config = clone($data);
-        // Move embedded files into a proper filearea and adjust HTML links to match.
-        $config->text_all = file_save_draft_area_files($data->text_all['itemid'], $this->context->id, 'block_groupspecifichtml',
-                                                       'content', 99999999, array('subdirs' => true), $data->text_all['text']);
+        // Move embedded files into a proper filearea and adjust HTML links to match
+        $config->text_all = file_save_draft_area_files($data->text_all['itemid'], $this->context->id, 'block_groupspecificthtml', 'content', 0, array('subdirs' => true), $data->text_all['text']);
         $config->format_all = $data->text_all['format'];
 
-        $config->text_0 = file_save_draft_area_files($data->text_0['itemid'], $this->context->id, 'block_groupspecifichtml',
-                                                     'content', 0, array('subdirs' => true), $data->text_0['text']);
+        $config->text_0 = file_save_draft_area_files($data->text_all['itemid'], $this->context->id, 'block_groupspecificthtml', 'content', 0, array('subdirs' => true), $data->text_0['text']);
         $config->format_0 = $data->text_0['format'];
 
         $groups = groups_get_all_groups($COURSE->id);
@@ -139,9 +138,7 @@ class block_groupspecifichtml extends block_base {
             foreach ($groups as $g) {
                 $textkey = 'text_'.$g->id;
                 $formatkey = 'format_'.$g->id;
-                $config->{$textkey} = file_save_draft_area_files($data->{$textkey}['itemid'], $this->context->id,
-                                                                 'block_groupspecifichtml', 'content', $g->id,
-                                                                 array('subdirs' => true), $data->{$textkey}['text']);
+                $config->{$textkey} = file_save_draft_area_files($data->{$textkey}['itemid'], $this->context->id, 'block_groupspecificthtml', 'content', 0, array('subdirs' => true), $data->{$textkey}['text']);
                 $config->{$formatkey} = $data->{$textkey}['format'];
             }
         }
@@ -149,7 +146,7 @@ class block_groupspecifichtml extends block_base {
         parent::instance_config_save($config, $nolongerused);
     }
 
-    public function instance_delete() {
+    function instance_delete() {
         global $DB;
 
         $fs = get_file_storage();
@@ -157,7 +154,7 @@ class block_groupspecifichtml extends block_base {
         return true;
     }
 
-    public function content_is_trusted() {
+    function content_is_trusted() {
         global $SCRIPT;
 
         if (!$context = context::instance_by_id($this->instance->parentcontextid)) {
@@ -191,7 +188,7 @@ class block_groupspecifichtml extends block_base {
     /*
      * Hide the title bar when none set..
      */
-    public function hide_header() {
+    function hide_header() {
         return empty($this->config->title);
     }
 }

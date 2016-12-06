@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * Form for editing HTML block instances.
  *
@@ -23,9 +25,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @version   Moodle 2.x
  */
-defined('MOODLE_INTERNAL') || die();
 
 function block_groupspecifichtml_pluginfile($course, $birecord_or_cm, $context, $filearea, $args, $forcedownload) {
+    global $SCRIPT;
 
     if ($context->contextlevel != CONTEXT_BLOCK) {
         send_file_not_found();
@@ -39,11 +41,10 @@ function block_groupspecifichtml_pluginfile($course, $birecord_or_cm, $context, 
 
     $fs = get_file_storage();
 
-    $itemid = array_shift($args);
     $filename = array_pop($args);
     $filepath = $args ? '/'.implode('/', $args).'/' : '/';
 
-    if (!$file = $fs->get_file($context->id, 'block_groupspecifichtml', 'content', $itemid, $filepath, $filename) or $file->is_directory()) {
+    if (!$file = $fs->get_file($context->id, 'block_groupspecifichtml', 'content', 0, $filepath, $filename) or $file->is_directory()) {
         send_file_not_found();
     }
 
@@ -61,7 +62,7 @@ function block_groupspecifichtml_pluginfile($course, $birecord_or_cm, $context, 
     }
 
     session_get_instance()->write_close();
-    send_stored_file($file, 60 * 60, 0, $forcedownload);
+    send_stored_file($file, 60*60, 0, $forcedownload);
 }
 
 /**
@@ -75,24 +76,24 @@ function block_groupspecifichtml_global_db_replace($search, $replace) {
 
     $instances = $DB->get_recordset('block_instances', array('blockname' => 'groupspecifichtml'));
     foreach ($instances as $instance) {
-        // TODO: intentionally hardcoded until MDL-26800 is fixed.
+        // TODO: intentionally hardcoded until MDL-26800 is fixed
         $config = unserialize(base64_decode($instance->configdata));
         $commit = false;
-        if (isset($config->text_all) && is_string($config->text_all)) {
+        if (isset($config->text_all) and is_string($config->text_all)) {
             $commit = true;
             $config->text_all = str_replace($search, $replace, $config->text_all);
         }
 
-        if (isset($config->text_0) && is_string($config->text_0)) {
+        if (isset($config->text_0) and is_string($config->text_0)) {
             $commit = true;
             $config->text_0 = str_replace($search, $replace, $config->text_0);
         }
-
+        
         $groups = groups_get_all_groups($isntance->courseid);
         if (!empty($groups)) {
             foreach ($groups as $g) {
                 $textvar = 'text_'.$g->id;
-                if (isset($config->{$textvar}) && is_string($config->{$textvar})) {
+                if (isset($config->{$textvar}) and is_string($config->{$textvar})) {
                     $commit = true;
                     $config->{$textvar} = str_replace($search, $replace, $config->{$textvar});
                 }
