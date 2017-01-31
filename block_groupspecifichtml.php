@@ -33,7 +33,8 @@ class block_groupspecifichtml extends block_base {
     }
 
     public function specialization() {
-        $this->title = isset($this->config->title) ? format_string($this->config->title) : format_string(get_string('newhtmlblock', 'block_groupspecifichtml'));
+        $defaulttitle = format_string(get_string('newhtmlblock', 'block_groupspecifichtml'));
+        $this->title = isset($this->config->title) ? format_string($this->config->title) : $defaulttitle;
     }
 
     public function instance_allow_multiple() {
@@ -43,7 +44,7 @@ class block_groupspecifichtml extends block_base {
     public function get_content() {
         global $COURSE, $CFG, $USER;
 
-        if ($this->content !== NULL) {
+        if ($this->content !== null) {
             return $this->content;
         }
 
@@ -74,7 +75,8 @@ class block_groupspecifichtml extends block_base {
 
         $coursegroups = groups_get_all_groups($COURSE->id);
         if (($coursegroups) && $usegroupmenu) {
-            $this->content->text .= groups_print_course_menu($COURSE, new moodle_url('/course/view.php', array('id' => $COURSE->id)), true);
+            $menuurl = new moodle_url('/course/view.php', array('id' => $COURSE->id));
+            $this->content->text .= groups_print_course_menu($COURSE, $menuurl, true);
         }
 
         $gid = 0 + groups_get_course_group($COURSE, $USER->id);
@@ -96,7 +98,8 @@ class block_groupspecifichtml extends block_base {
                     $format = $this->config->$formatkey;
                 }
                 // Rewrite url.
-                $this->config->$tk = file_rewrite_pluginfile_urls($this->config->$tk, 'pluginfile.php', $this->context->id, 'block_groupspecifichtml', 'content', $tkgid, null);
+                $this->config->$tk = file_rewrite_pluginfile_urls($this->config->$tk, 'pluginfile.php', $this->context->id,
+                                                                  'block_groupspecifichtml', 'content', $tkgid, null);
                 /*
                  * Default to FORMAT_HTML which is what will have been used before the
                  * editor was properly implemented for the block.
@@ -167,7 +170,10 @@ class block_groupspecifichtml extends block_base {
         // Find out if this block is on the profile page.
         if ($context->contextlevel == CONTEXT_USER) {
             if ($SCRIPT === '/my/index.php') {
-                // This is exception - page is completely private, nobody else may see content there that is why we allow JS here.
+                /*
+                 * This is exception - page is completely private, nobody else may see content
+                 * there that is why we allow JS here.
+                 */
                 return true;
             } else {
                 // No JS on public personal pages, it would be a big security issue.
