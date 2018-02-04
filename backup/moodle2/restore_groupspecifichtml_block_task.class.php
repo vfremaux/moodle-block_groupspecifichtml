@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * @package     block_groupspecifichtml
  * @category    blocks
@@ -21,7 +23,6 @@
  * @copyright 2003 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Specialised restore task for the groupspecifichtml block
@@ -42,7 +43,7 @@ class restore_groupspecifichtml_block_task extends restore_block_task {
     }
 
     public function get_configdata_encoded_attributes() {
-        return array(); // We need to encode some attrs in configdata.
+        return array(); // We need to encode some attrs in configdata
     }
 
     static public function define_decode_contents() {
@@ -85,7 +86,7 @@ class restore_groupspecifichtml_block_task extends restore_block_task {
         $configdata = $DB->get_field('block_instances', 'configdata', array('id' => $blockid));
         $data = unserialize(base64_decode($configdata));
 
-        $newdata = new StdClass(); // We need make a new object to avoid group id collisions.
+        $newdata = new StdClass(); // We need make a new object to avoid group id collisions
 
         $newids = array();
         foreach($data as $key => $info) {
@@ -98,7 +99,7 @@ class restore_groupspecifichtml_block_task extends restore_block_task {
                     $newids = $newgid;
                 }
             } else {
-                // Do not change.
+                // Do not change
                 $newdata->$key = $info;
             }
         }

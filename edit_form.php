@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * Form for editing HTML block instances.
  *
@@ -22,7 +24,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @version   Moodle 2.x
  */
-defined('MOODLE_INTERNAL') || die();
 
 class block_groupspecifichtml_edit_form extends block_edit_form {
 
@@ -36,21 +37,18 @@ class block_groupspecifichtml_edit_form extends block_edit_form {
         $mform->setType('config_title', PARAM_MULTILANG);
 
         $editoroptions = array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $this->block->context);
-        $label = get_string('configcontentforall', 'block_groupspecifichtml');
-        $mform->addElement('editor', 'config_text_all', $label, null, $editoroptions);
-        $mform->setType('config_text_all', PARAM_RAW); // XSS is prevented when printing the block contents and serving files.
+        $mform->addElement('editor', 'config_text_all', get_string('configcontentforall', 'block_groupspecifichtml'), null, $editoroptions);
+        $mform->setType('config_text_all', PARAM_RAW); // XSS is prevented when printing the block contents and serving files
 
-        $label = get_string('configcontentforany', 'block_groupspecifichtml');
-        $mform->addElement('editor', 'config_text_0', $label, null, $editoroptions);
-        $mform->setType('config_text_0', PARAM_RAW); // XSS is prevented when printing the block contents and serving files.
+        $mform->addElement('editor', 'config_text_0', get_string('configcontentforany', 'block_groupspecifichtml'), null, $editoroptions);
+        $mform->setType('config_text_0', PARAM_RAW); // XSS is prevented when printing the block contents and serving files
 
         $groups = groups_get_all_groups($COURSE->id);
         $gids = array();
         if (!empty($groups)) {
-            foreach ($groups as $g) {
-                $label = get_string('configcontent', 'block_groupspecifichtml', $g->name);
-                $mform->addElement('editor', 'config_text_'.$g->id, $label, null, $editoroptions);
-                $mform->setType('config_text_'.$g->id, PARAM_RAW);
+            foreach($groups as $g) {
+                $mform->addElement('editor', 'config_text_'.$g->id, get_string('configcontent', 'block_groupspecifichtml', $g->name), null, $editoroptions);
+                $mform->setType('config_text_'.$g->id, PARAM_RAW); // XSS is prevented when printing the block contents and serving files
                 $gids[] = $g->id;
             }
         }
@@ -61,7 +59,7 @@ class block_groupspecifichtml_edit_form extends block_edit_form {
 
     }
 
-    public function set_data($defaults, &$files = null) {
+    function set_data($defaults, &$files = null) {
         global $COURSE;
 
         $groups = groups_get_all_groups($COURSE->id);
@@ -75,9 +73,7 @@ class block_groupspecifichtml_edit_form extends block_edit_form {
             } else {
                 $currenttext = $text_all;
             }
-            $defaults->config_text_all['text'] = file_prepare_draft_area($draftid_editor, $this->block->context->id,
-                                                                         'block_groupspecifichtml', 'content', 0,
-                                                                         array('subdirs' => true), $currenttext);
+            $defaults->config_text_all['text'] = file_prepare_draft_area($draftid_editor, $this->block->context->id, 'block_groupspecifichtml', 'content', 0, array('subdirs' => true), $currenttext);
             $defaults->config_text_all['itemid'] = $draftid_editor;
             $defaults->config_text_all['format'] = @$this->block->config->format;
 
@@ -89,9 +85,7 @@ class block_groupspecifichtml_edit_form extends block_edit_form {
             } else {
                 $currenttext = $text_0;
             }
-            $defaults->config_text_0['text'] = file_prepare_draft_area($draftid_editor, $this->block->context->id,
-                                                                       'block_groupspecifichtml', 'content', 0,
-                                                                       array('subdirs' => true), $currenttext);
+            $defaults->config_text_0['text'] = file_prepare_draft_area($draftid_editor, $this->block->context->id, 'block_groupspecifichtml', 'content', 0, array('subdirs' => true), $currenttext);
             $defaults->config_text_0['itemid'] = $draftid_editor;
             $defaults->config_text_0['format'] = @$this->block->config->format;
 
@@ -107,9 +101,7 @@ class block_groupspecifichtml_edit_form extends block_edit_form {
                     } else {
                         $currenttext = $$textvar;
                     }
-                    $defaults->{$configtextvar}['text'] = file_prepare_draft_area($draftid_editor, $this->block->context->id,
-                                                                                  'block_groupspecifichtml', 'content', 0,
-                                                                                  array('subdirs' => true), $currenttext);
+                    $defaults->{$configtextvar}['text'] = file_prepare_draft_area($draftid_editor, $this->block->context->id, 'block_groupspecifichtml', 'content', 0, array('subdirs' => true), $currenttext);
                     $defaults->{$configtextvar}['itemid'] = $draftid_editor;
                     $defaults->{$configtextvar}['format'] = @$this->block->config->format;
                 }
@@ -144,7 +136,7 @@ class block_groupspecifichtml_edit_form extends block_edit_form {
         }
         parent::set_data($defaults);
 
-        // Restore text.
+        // restore $text
         if (!isset($this->block->config)) {
             $this->block->config = new StdClass();
         }
@@ -158,8 +150,9 @@ class block_groupspecifichtml_edit_form extends block_edit_form {
         }
 
         if (isset($title)) {
-            // Reset the preserved title.
+            // Reset the preserved title
             $this->block->config->title = $title;
         }
+
     }
 }
