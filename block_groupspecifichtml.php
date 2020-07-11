@@ -34,8 +34,8 @@ class block_groupspecifichtml extends block_base {
     }
 
     public function specialization() {
-        $defaulttitle = format_string(get_string('newhtmlblock', 'block_groupspecifichtml');
-        $this->title = isset($this->config->title) ? format_string($this->config->title) : $defaulttitle);
+        $defaulttitle = format_string(get_string('newhtmlblock', 'block_groupspecifichtml'));
+        $this->title = isset($this->config->title) ? format_string($this->config->title) : $defaulttitle;
     }
 
     public function instance_allow_multiple() {
