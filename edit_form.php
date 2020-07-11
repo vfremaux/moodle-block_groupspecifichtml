@@ -69,12 +69,12 @@ class block_groupspecifichtml_edit_form extends block_edit_form {
         if (!empty($this->block->config) && is_object($this->block->config)) {
 
             // Draft file handling for all.
-            $text_all = $this->block->config->text_all;
+            $textall = $this->block->config->text_all;
             $draftideditor = file_get_submitted_draft_itemid('config_text_all');
-            if (empty($text_all)) {
+            if (empty($textall)) {
                 $currenttext = '';
             } else {
-                $currenttext = $text_all;
+                $currenttext = $textall;
             }
             $defaults->config_text_all['text'] = file_prepare_draft_area($draftideditor, $this->block->context->id,
                     'block_groupspecifichtml', 'content', 0, array('subdirs' => true), $currenttext);
@@ -82,12 +82,12 @@ class block_groupspecifichtml_edit_form extends block_edit_form {
             $defaults->config_text_all['format'] = @$this->block->config->format;
 
             // Draft file handling for any.
-            $text_0 = $this->block->config->text_0;
+            $text0 = $this->block->config->text_0;
             $draftideditor = file_get_submitted_draft_itemid('config_text_0');
-            if (empty($text_0)) {
+            if (empty($text0)) {
                 $currenttext = '';
             } else {
-                $currenttext = $text_0;
+                $currenttext = $text0;
             }
             $defaults->config_text_0['text'] = file_prepare_draft_area($draftideditor, $this->block->context->id,
                     'block_groupspecifichtml', 'content', 0, array('subdirs' => true), $currenttext);
@@ -114,8 +114,8 @@ class block_groupspecifichtml_edit_form extends block_edit_form {
                 }
             }
         } else {
-            $text_all = '';
-            $text_0 = '';
+            $textall = '';
+            $text0 = '';
             if (!empty($groups)) {
                 foreach ($groups as $g) {
                     $textvar = 'text_'.$g->id;
@@ -147,8 +147,8 @@ class block_groupspecifichtml_edit_form extends block_edit_form {
         if (!isset($this->block->config)) {
             $this->block->config = new StdClass();
         }
-        $this->block->config->text_all = $text_all;
-        $this->block->config->text_0 = $text_0;
+        $this->block->config->text_all = $textall;
+        $this->block->config->text_0 = $text0;
         if (!empty($groups)) {
             foreach ($groups as $g) {
                 $textvar = 'text_'.$g->id;

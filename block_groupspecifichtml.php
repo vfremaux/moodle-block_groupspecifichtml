@@ -129,10 +129,12 @@ class block_groupspecifichtml extends block_base {
 
         $config = clone($data);
         // Move embedded files into a proper filearea and adjust HTML links to match
-        $config->text_all = file_save_draft_area_files($data->text_all['itemid'], $this->context->id, 'block_groupspecificthtml', 'content', 0, array('subdirs' => true), $data->text_all['text']);
+        $config->text_all = file_save_draft_area_files($data->text_all['itemid'], $this->context->id,
+                'block_groupspecificthtml', 'content', 0, array('subdirs' => true), $data->text_all['text']);
         $config->format_all = $data->text_all['format'];
 
-        $config->text_0 = file_save_draft_area_files($data->text_all['itemid'], $this->context->id, 'block_groupspecificthtml', 'content', 0, array('subdirs' => true), $data->text_0['text']);
+        $config->text_0 = file_save_draft_area_files($data->text_all['itemid'], $this->context->id,
+                'block_groupspecificthtml', 'content', 0, array('subdirs' => true), $data->text_0['text']);
         $config->format_0 = $data->text_0['format'];
 
         $groups = groups_get_all_groups($COURSE->id);
