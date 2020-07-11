@@ -42,7 +42,7 @@ class block_groupspecifichtml_edit_form extends block_edit_form {
         $mform->setType('config_text_all', PARAM_RAW); // XSS is prevented when printing the block contents and serving files.
 
         $label = get_string('configcontentforany', 'block_groupspecifichtml');
-s        $mform->addElement('editor', 'config_text_0', $label, null, $editoroptions);
+        $mform->addElement('editor', 'config_text_0', $label, null, $editoroptions);
         $mform->setType('config_text_0', PARAM_RAW); // XSS is prevented when printing the block contents and serving files.
 
         $groups = groups_get_all_groups($COURSE->id);
