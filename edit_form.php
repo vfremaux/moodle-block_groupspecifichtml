@@ -106,7 +106,7 @@ class block_groupspecifichtml_edit_form extends block_edit_form {
                     } else {
                         $currenttext = $$textvar;
                     }
-                    $defaults->{$configtextvar}['text'] = file_prepare_draft_area($draftideditor, 
+                    $defaults->{$configtextvar}['text'] = file_prepare_draft_area($draftideditor,
                             $this->block->context->id, 'block_groupspecifichtml', 'content',
                                     0, array('subdirs' => true), $currenttext);
                     $defaults->{$configtextvar}['itemid'] = $draftideditor;
