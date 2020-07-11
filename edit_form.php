@@ -37,18 +37,21 @@ class block_groupspecifichtml_edit_form extends block_edit_form {
         $mform->setType('config_title', PARAM_MULTILANG);
 
         $editoroptions = array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $this->block->context);
-        $mform->addElement('editor', 'config_text_all', get_string('configcontentforall', 'block_groupspecifichtml'), null, $editoroptions);
-        $mform->setType('config_text_all', PARAM_RAW); // XSS is prevented when printing the block contents and serving files
+        $label = get_string('configcontentforall', 'block_groupspecifichtml');
+        $mform->addElement('editor', 'config_text_all', $label, null, $editoroptions);
+        $mform->setType('config_text_all', PARAM_RAW); // XSS is prevented when printing the block contents and serving files.
 
-        $mform->addElement('editor', 'config_text_0', get_string('configcontentforany', 'block_groupspecifichtml'), null, $editoroptions);
-        $mform->setType('config_text_0', PARAM_RAW); // XSS is prevented when printing the block contents and serving files
+        $label = get_string('configcontentforany', 'block_groupspecifichtml');
+s        $mform->addElement('editor', 'config_text_0', $label, null, $editoroptions);
+        $mform->setType('config_text_0', PARAM_RAW); // XSS is prevented when printing the block contents and serving files.
 
         $groups = groups_get_all_groups($COURSE->id);
         $gids = array();
         if (!empty($groups)) {
-            foreach($groups as $g) {
-                $mform->addElement('editor', 'config_text_'.$g->id, get_string('configcontent', 'block_groupspecifichtml', $g->name), null, $editoroptions);
-                $mform->setType('config_text_'.$g->id, PARAM_RAW); // XSS is prevented when printing the block contents and serving files
+            foreach ($groups as $g) {
+                $label = get_string('configcontent', 'block_groupspecifichtml', $g->name);
+                $mform->addElement('editor', 'config_text_'.$g->id, $label, null, $editoroptions);
+                $mform->setType('config_text_'.$g->id, PARAM_RAW); // XSS is prevented when printing the block contents and serving files.
                 $gids[] = $g->id;
             }
         }
@@ -59,7 +62,7 @@ class block_groupspecifichtml_edit_form extends block_edit_form {
 
     }
 
-    function set_data($defaults, &$files = null) {
+    public function set_data($defaults, &$files = null) {
         global $COURSE;
 
         $groups = groups_get_all_groups($COURSE->id);
@@ -67,26 +70,28 @@ class block_groupspecifichtml_edit_form extends block_edit_form {
 
             // Draft file handling for all.
             $text_all = $this->block->config->text_all;
-            $draftid_editor = file_get_submitted_draft_itemid('config_text_all');
+            $draftideditor = file_get_submitted_draft_itemid('config_text_all');
             if (empty($text_all)) {
                 $currenttext = '';
             } else {
                 $currenttext = $text_all;
             }
-            $defaults->config_text_all['text'] = file_prepare_draft_area($draftid_editor, $this->block->context->id, 'block_groupspecifichtml', 'content', 0, array('subdirs' => true), $currenttext);
-            $defaults->config_text_all['itemid'] = $draftid_editor;
+            $defaults->config_text_all['text'] = file_prepare_draft_area($draftideditor, $this->block->context->id,
+                    'block_groupspecifichtml', 'content', 0, array('subdirs' => true), $currenttext);
+            $defaults->config_text_all['itemid'] = $draftideditor;
             $defaults->config_text_all['format'] = @$this->block->config->format;
 
             // Draft file handling for any.
             $text_0 = $this->block->config->text_0;
-            $draftid_editor = file_get_submitted_draft_itemid('config_text_0');
+            $draftideditor = file_get_submitted_draft_itemid('config_text_0');
             if (empty($text_0)) {
                 $currenttext = '';
             } else {
                 $currenttext = $text_0;
             }
-            $defaults->config_text_0['text'] = file_prepare_draft_area($draftid_editor, $this->block->context->id, 'block_groupspecifichtml', 'content', 0, array('subdirs' => true), $currenttext);
-            $defaults->config_text_0['itemid'] = $draftid_editor;
+            $defaults->config_text_0['text'] = file_prepare_draft_area($draftideditor, $this->block->context->id,
+                    'block_groupspecifichtml', 'content', 0, array('subdirs' => true), $currenttext);
+            $defaults->config_text_0['itemid'] = $draftideditor;
             $defaults->config_text_0['format'] = @$this->block->config->format;
 
             if (!empty($groups)) {
@@ -95,14 +100,16 @@ class block_groupspecifichtml_edit_form extends block_edit_form {
                     $textvar = 'text_'.$g->id;
                     $configtextvar = 'config_text_'.$g->id;
                     $$textvar = $this->block->config->$textvar;
-                    $draftid_editor = file_get_submitted_draft_itemid('config_text_'.$g->id);
+                    $draftideditor = file_get_submitted_draft_itemid('config_text_'.$g->id);
                     if (empty($$textvar)) {
                         $currenttext = '';
                     } else {
                         $currenttext = $$textvar;
                     }
-                    $defaults->{$configtextvar}['text'] = file_prepare_draft_area($draftid_editor, $this->block->context->id, 'block_groupspecifichtml', 'content', 0, array('subdirs' => true), $currenttext);
-                    $defaults->{$configtextvar}['itemid'] = $draftid_editor;
+                    $defaults->{$configtextvar}['text'] = file_prepare_draft_area($draftideditor, 
+                            $this->block->context->id, 'block_groupspecifichtml', 'content',
+                                    0, array('subdirs' => true), $currenttext);
+                    $defaults->{$configtextvar}['itemid'] = $draftideditor;
                     $defaults->{$configtextvar}['format'] = @$this->block->config->format;
                 }
             }
@@ -150,7 +157,7 @@ class block_groupspecifichtml_edit_form extends block_edit_form {
         }
 
         if (isset($title)) {
-            // Reset the preserved title
+            // Reset the preserved title.
             $this->block->config->title = $title;
         }
 
