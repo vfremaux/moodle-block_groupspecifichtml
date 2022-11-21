@@ -43,7 +43,7 @@ class restore_groupspecifichtml_block_task extends restore_block_task {
     }
 
     public function get_configdata_encoded_attributes() {
-        return array(); // We need to encode some attrs in configdata
+        return array(); // We need to encode some attrs in configdata.
     }
 
     static public function define_decode_contents() {
@@ -86,10 +86,10 @@ class restore_groupspecifichtml_block_task extends restore_block_task {
         $configdata = $DB->get_field('block_instances', 'configdata', array('id' => $blockid));
         $data = unserialize(base64_decode($configdata));
 
-        $newdata = new StdClass(); // We need make a new object to avoid group id collisions
+        $newdata = new StdClass(); // We need make a new object to avoid group id collisions.
 
         $newids = array();
-        foreach($data as $key => $info) {
+        foreach ($data as $key => $info) {
             if (preg_match('/text_(\\d+)/', $key, $matches)) {
                 if ($gid > 0) {
                     $gid = $matches[1];
@@ -99,7 +99,7 @@ class restore_groupspecifichtml_block_task extends restore_block_task {
                     $newids = $newgid;
                 }
             } else {
-                // Do not change
+                // Do not change.
                 $newdata->$key = $info;
             }
         }
