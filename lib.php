@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
  * @version   Moodle 2.x
  */
 
-function block_groupspecifichtml_pluginfile($course, $birecord_or_cm, $context, $filearea, $args, $forcedownload) {
+function block_groupspecifichtml_pluginfile($course, $birecordorcm, $context, $filearea, $args, $forcedownload) {
     global $SCRIPT;
 
     if ($context->contextlevel != CONTEXT_BLOCK) {
@@ -44,11 +44,12 @@ function block_groupspecifichtml_pluginfile($course, $birecord_or_cm, $context, 
     $filename = array_pop($args);
     $filepath = $args ? '/'.implode('/', $args).'/' : '/';
 
-    if (!$file = $fs->get_file($context->id, 'block_groupspecifichtml', 'content', 0, $filepath, $filename) or $file->is_directory()) {
+    if (!($file = $fs->get_file($context->id, 'block_groupspecifichtml', 'content', 0, $filepath, $filename)) ||
+            $file->is_directory()) {
         send_file_not_found();
     }
 
-    if ($parentcontext = context::instance_by_id($birecord_or_cm->parentcontextid)) {
+    if ($parentcontext = context::instance_by_id($birecordorcm->parentcontextid)) {
         if ($parentcontext->contextlevel == CONTEXT_USER) {
             /*
              * force download on all personal pages including /my/
@@ -62,7 +63,7 @@ function block_groupspecifichtml_pluginfile($course, $birecord_or_cm, $context, 
     }
 
     session_get_instance()->write_close();
-    send_stored_file($file, 60*60, 0, $forcedownload);
+    send_stored_file($file, 60 * 60, 0, $forcedownload);
 }
 
 /**
@@ -76,7 +77,7 @@ function block_groupspecifichtml_global_db_replace($search, $replace) {
 
     $instances = $DB->get_recordset('block_instances', array('blockname' => 'groupspecifichtml'));
     foreach ($instances as $instance) {
-        // TODO: intentionally hardcoded until MDL-26800 is fixed
+        // TODO: intentionally hardcoded until MDL-26800 is fixed.
         $config = unserialize(base64_decode($instance->configdata));
         $commit = false;
         if (isset($config->text_all) and is_string($config->text_all)) {
@@ -88,7 +89,7 @@ function block_groupspecifichtml_global_db_replace($search, $replace) {
             $commit = true;
             $config->text_0 = str_replace($search, $replace, $config->text_0);
         }
-        
+
         $groups = groups_get_all_groups($isntance->courseid);
         if (!empty($groups)) {
             foreach ($groups as $g) {

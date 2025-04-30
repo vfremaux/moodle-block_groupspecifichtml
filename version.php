@@ -18,18 +18,18 @@
  * Version details.
  *
  * @package    block_groupspecifichtml
- * @category   blocks
  * @copyright  2012 valery fremaux (valery.fremaux@gmail.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2016083100;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2018042700;        // Requires this Moodle version.
+$plugin->version   = 2025042900;        // The current plugin version (Date: YYYYMMDDXX).
+$plugin->requires  = 2022112801;        // Requires this Moodle version.
 $plugin->component = 'block_groupspecifichtml';  // Full name of the plugin (used for diagnostics).
-$plugin->maturity = MATURITY_RC;
-$plugin->release = '3.5.0 (build 2016083100)';
+$plugin->maturity = MATURITY_STABLE;
+$plugin->release = '4.5.0 (build 2025042900)';
+$plugin->supported = [403, 405];
 
 // Non moodle attributes.
-$plugin->codeincrement = '3.5.0000';
+$plugin->codeincrement = '4.5.0000';
