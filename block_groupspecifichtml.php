@@ -34,7 +34,8 @@ class block_groupspecifichtml extends block_base {
     }
 
     public function specialization() {
-        $this->title = isset($this->config->title) ? format_string($this->config->title) : format_string(get_string('newhtmlblock', 'block_groupspecifichtml'));
+        $defaulttitle = format_string(get_string('newhtmlblock', 'block_groupspecifichtml'));
+        $this->title = isset($this->config->title) ? format_string($this->config->title) : $defaulttitle;
     }
 
     public function instance_allow_multiple() {
@@ -43,15 +44,15 @@ class block_groupspecifichtml extends block_base {
 
     public function get_content() {
         global $COURSE, $CFG, $USER;
-        
-        if ($this->content !== NULL) {
+
+        if ($this->content !== null) {
             return $this->content;
         }
 
         $filteropt = new stdClass;
         $filteropt->overflowdiv = true;
         if ($this->content_is_trusted()) {
-            // fancy html allowed only on course, category and system blocks.
+            // Fancy html allowed only on course, category and system blocks.
             $filteropt->noclean = true;
         }
 
@@ -97,7 +98,8 @@ class block_groupspecifichtml extends block_base {
                     $format = $this->config->$formatkey;
                 }
                 // Rewrite url.
-                $this->config->$tk = file_rewrite_pluginfile_urls($this->config->$tk, 'pluginfile.php', $this->context->id, 'block_groupspecifichtml', 'content', NULL);
+                $this->config->$tk = file_rewrite_pluginfile_urls($this->config->$tk, 'pluginfile.php',
+                        $this->context->id, 'block_groupspecifichtml', 'content', null);
                 /*
                  * Default to FORMAT_HTML which is what will have been used before the
                  * editor was properly implemented for the block.
@@ -122,15 +124,17 @@ class block_groupspecifichtml extends block_base {
     /**
      * Serialize and store config data
      */
-    function instance_config_save($data, $nolongerused = false) {
+    public function instance_config_save($data, $nolongerused = false) {
         global $DB, $COURSE;
 
         $config = clone($data);
         // Move embedded files into a proper filearea and adjust HTML links to match
-        $config->text_all = file_save_draft_area_files($data->text_all['itemid'], $this->context->id, 'block_groupspecificthtml', 'content', 0, array('subdirs' => true), $data->text_all['text']);
+        $config->text_all = file_save_draft_area_files($data->text_all['itemid'], $this->context->id,
+                'block_groupspecificthtml', 'content', 0, array('subdirs' => true), $data->text_all['text']);
         $config->format_all = $data->text_all['format'];
 
-        $config->text_0 = file_save_draft_area_files($data->text_all['itemid'], $this->context->id, 'block_groupspecificthtml', 'content', 0, array('subdirs' => true), $data->text_0['text']);
+        $config->text_0 = file_save_draft_area_files($data->text_all['itemid'], $this->context->id,
+                'block_groupspecificthtml', 'content', 0, array('subdirs' => true), $data->text_0['text']);
         $config->format_0 = $data->text_0['format'];
 
         $groups = groups_get_all_groups($COURSE->id);
@@ -138,7 +142,9 @@ class block_groupspecifichtml extends block_base {
             foreach ($groups as $g) {
                 $textkey = 'text_'.$g->id;
                 $formatkey = 'format_'.$g->id;
-                $config->{$textkey} = file_save_draft_area_files($data->{$textkey}['itemid'], $this->context->id, 'block_groupspecificthtml', 'content', 0, array('subdirs' => true), $data->{$textkey}['text']);
+                $config->{$textkey} = file_save_draft_area_files($data->{$textkey}['itemid'], $this->context->id,
+                        'block_groupspecificthtml', 'content', 0,
+                                array('subdirs' => true), $data->{$textkey}['text']);
                 $config->{$formatkey} = $data->{$textkey}['format'];
             }
         }
@@ -146,7 +152,7 @@ class block_groupspecifichtml extends block_base {
         parent::instance_config_save($config, $nolongerused);
     }
 
-    function instance_delete() {
+    public function instance_delete() {
         global $DB;
 
         $fs = get_file_storage();
@@ -154,7 +160,7 @@ class block_groupspecifichtml extends block_base {
         return true;
     }
 
-    function content_is_trusted() {
+    public function content_is_trusted() {
         global $SCRIPT;
 
         if (!$context = context::instance_by_id($this->instance->parentcontextid)) {
@@ -188,7 +194,7 @@ class block_groupspecifichtml extends block_base {
     /*
      * Hide the title bar when none set..
      */
-    function hide_header() {
+    public function hide_header() {
         return empty($this->config->title);
     }
 }
