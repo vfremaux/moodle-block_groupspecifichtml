@@ -24,16 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-<<<<<<< HEAD
-$plugin->version   = 2016083100;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2018112800;        // Requires this Moodle version.
-$plugin->component = 'block_groupspecifichtml';  // Full name of the plugin (used for diagnostics).
-$plugin->maturity = MATURITY_RC;
-$plugin->release = '3.6.0 (build 2016083100)';
-
-// Non moodle attributes.
-$plugin->codeincrement = '3.6.0000';
-=======
 $plugin->version   = 2025042900;        // The current plugin version (Date: YYYYMMDDXX).
 $plugin->requires  = 2022112801;        // Requires this Moodle version.
 $plugin->component = 'block_groupspecifichtml';  // Full name of the plugin (used for diagnostics).
@@ -43,4 +33,3 @@ $plugin->supported = [403, 405];
 
 // Non moodle attributes.
 $plugin->codeincrement = '4.5.0000';
->>>>>>> MOODLE_405_STABLE
